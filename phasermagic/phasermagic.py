@@ -4,7 +4,7 @@ import pysmagic
 
 
 # magic commandを登録する関数
-def register_pysmagic():
+def register_phasermagic():
     from IPython import get_ipython  # type: ignore  # noqa: F401
     ipy = get_ipython()
     ipy.register_magic_function(runphaser)
@@ -16,7 +16,7 @@ def register_pysmagic():
 @magic.register_cell_magic
 def runphaser(line, cell):
     """
-    セル内のPhaser.jsを使ったPythonコードをPyScriptを用いてiframe内で実行するマジックコマンド
+    セル内のPhaserを使ったPythonコードをPyScriptを用いてiframe内で実行するマジックコマンド
 
     Usage:
         %%runpys [width] [height] [background] [py_type] [py_val] [py_conf] [js_src] [py_ver]
@@ -43,7 +43,7 @@ def runphaser(line, cell):
 @magic.register_cell_magic
 def genphaser(line, cell):
     """
-    セル内のPhaser.jsを使ったPythonコードをPyScriptを用いてiframe内で実行するために生成したHTMLを表示するマジックコマンド
+    セル内のPhaserを使ったPythonコードをPyScriptを用いてiframe内で実行するために生成したHTMLを表示するマジックコマンド
     """
     # 引数のパース
     args = parse_phaser_args(line)
@@ -51,6 +51,11 @@ def genphaser(line, cell):
     args["htmlmode"] = True
 
     # PyScriptを実行
+    pysmagic.run_pyscript(args)
+
+
+def run_phaser_script(args):
+    args = set_phaser_args(args)
     pysmagic.run_pyscript(args)
 
 

@@ -2,7 +2,7 @@
 
 ## 概要
 
-Jypyter(notebook/lab)・VSCodeまたはGoogle ColabでPhaser.jsを使ったコードセルのPythonコードをPyScriptを使ってiframe(ブラウザ)上で実行するマジックコマンドです。
+Jypyter(notebook/lab)・VSCodeまたはGoogle ColabでPhaserを使ったコードセルのPythonコードをPyScriptを使ってiframe(ブラウザ)上で実行するマジックコマンドです。
 
 ## 使い方
 
@@ -20,6 +20,8 @@ register_phasermagic()
 ### マジックコマンドの使い方
 
 コードセルの冒頭に以下のようにマジックコマンドを記述してください。実行するとアウトプットにiframeが表示されてその中でコードセルのコードがPyScriptで実行されます。
+
+以下は、Phaserライブラリを使って描画した赤い円を矢印キーで動かす例です。
 
 ```python
 %%runphaser 500 500 white
