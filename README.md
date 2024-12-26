@@ -52,7 +52,7 @@ def update(time, delta):
   graphics.fillCircle(x, y, 30)
 
 
-scene = Phaser.Scene.new('main')
+scene = Phaser.Scene.new('SampleScene')
 scene.create = create
 scene.update = update
 
@@ -61,6 +61,47 @@ config = {
   'width': 300,
   'height': 300,
   'scene': [scene]
+}
+```
+
+Phaser.SceneクラスをPyScript用にラップしたPhaserSceneクラスを継承して独自のシーンクラスを作成する形でも記述できます。
+
+```python
+%%runphaser 500 500 white
+
+class SampleScene(PhaserScene):
+    def __init__(self):
+        super().__init__('SampleScene')
+        self.cursor = None
+        self.graphics = None
+        self.x = 100
+        self.y = 100
+
+    def preload(self):
+        pass
+
+    def create(self, data):
+        self.cursor = self.scene.input.keyboard.createCursorKeys()
+        self.graphics = self.scene.add.graphics(set_config({'fillStyle': {'color': 0xff0000}}))
+
+    def update(self, time, delta):
+        self.graphics.clear()
+        if self.cursor.left.isDown:
+            self.x -= 5
+        if self.cursor.right.isDown:
+            self.x += 5
+        if self.cursor.up.isDown:
+            self.y -= 5
+        if self.cursor.down.isDown:
+            self.y += 5
+        self.graphics.fillCircle(self.x, self.y, 30)
+
+
+config = {
+    'type': Phaser.AUTO,
+    'width': 300,
+    'height': 300,
+    'scene': [SampleScene().scene]
 }
 ```
 
