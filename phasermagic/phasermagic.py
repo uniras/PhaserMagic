@@ -32,7 +32,7 @@ def runphaser(line, cell):
         py_ver: PyScriptのバージョンを指定します.
     """
     # 引数のパース
-    args = parse_phaser_args(line)
+    args = parse_phaser_args(line, cell)
     args = set_phaser_args(args)
     args["htmlmode"] = False
 
@@ -46,7 +46,7 @@ def genphaser(line, cell):
     セル内のPhaserを使ったPythonコードをPyScriptを用いてiframe内で実行するために生成したHTMLを表示するマジックコマンド
     """
     # 引数のパース
-    args = parse_phaser_args(line)
+    args = parse_phaser_args(line, cell)
     args = set_phaser_args(args)
     args["htmlmode"] = True
 
@@ -115,7 +115,7 @@ game = Phaser.Game.new(deep_dict_to_jsobj(config))
     return args
 
 
-def parse_phaser_args(line):
+def parse_phaser_args(line, cell):
     # 引数のパース
     line_args = shlex.split(line)
     args = {}
@@ -127,5 +127,6 @@ def parse_phaser_args(line):
     args["py_conf"] = line_args[5] if len(line_args) > 5 and line_args[5] != "{}" else None
     args["js_src"] = line_args[6] if len(line_args) > 6 and line_args[6] != "[]" else None
     args["py_ver"] = line_args[7] if len(line_args) > 7 else "none"
+    args["py_script"] = cell
 
     return args
