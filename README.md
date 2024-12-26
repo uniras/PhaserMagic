@@ -35,7 +35,7 @@ y = 100
 def create(data):
   global cursor, graphics
   cursor = scene.input.keyboard.createCursorKeys()
-  graphics = scene.add.graphics()
+  graphics = scene.add.graphics(set_config({'fillStyle': {'color': 0xff0000}}))
 
 
 def update(time, delta):
@@ -49,7 +49,6 @@ def update(time, delta):
     y -= 5
   if cursor.down.isDown:
     y += 5
-  graphics.fillStyle(0xff0000)
   graphics.fillCircle(x, y, 30)
 
 
