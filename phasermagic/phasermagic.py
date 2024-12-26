@@ -73,39 +73,55 @@ import js
 Phaser = js.Phaser
 
 def deep_dict_to_jsobj(data):
-  if not isinstance(data, dict):
-    return data
-  object = js.Object.new()
-  for key, value in data.items():
-    if isinstance(value, dict):
-      object[key] = deep_dict_to_jsobj(value)
-    elif isinstance(value, list):
-      object[key] = deep_list_to_jsarray(value)
-    else:
-      object[key] = value
-  return object
+    if not isinstance(data, dict):
+        return data
+    object = js.Object.new()
+    for key, value in data.items():
+        if isinstance(value, dict):
+            object[key] = deep_dict_to_jsobj(value)
+        elif isinstance(value, list):
+            object[key] = deep_list_to_jsarray(value)
+        else:
+            object[key] = value
+    return object
 
 
 def deep_list_to_jsarray(data):
-  if not isinstance(data, list):
-    return data
-  array = js.Array.new()
-  for value in data:
-    if isinstance(value, dict):
-      array.push(deep_dict_to_jsobj(value))
-    elif isinstance(value, list):
-      array.push(deep_list_to_jsarray(value))
-    else:
-      array.push(value)
-  return array
+    if not isinstance(data, list):
+        return data
+    array = js.Array.new()
+    for value in data:
+        if isinstance(value, dict):
+            array.push(deep_dict_to_jsobj(value))
+        elif isinstance(value, list):
+            array.push(deep_list_to_jsarray(value))
+        else:
+            array.push(value)
+    return array
 
 def set_config(config):
-  return deep_dict_to_jsobj(config)
+    return deep_dict_to_jsobj(config)
+
+class PhaserScene():
+    def __init__(self, name):
+        self.scene = Phaser.Scene.new(name)
+        self.scene.preload = self.preload
+        self.scene.create = self.create
+        self.scene.update = self.update
+
+    def preload(self):
+        pass
+
+    def create(self, data):
+        pass
+
+    def update(self, time, delta):
+        pass
 
 """
 
     aftercode = """
-game = Phaser.Game.new(deep_dict_to_jsobj(config))
+game = Phaser.Game.new(set_config(config))
 
 """
 
