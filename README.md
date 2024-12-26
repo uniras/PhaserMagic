@@ -21,6 +21,48 @@ register_phasermagic()
 
 コードセルの冒頭に以下のようにマジックコマンドを記述してください。実行するとアウトプットにiframeが表示されてその中でコードセルのコードがPyScriptで実行されます。
 
+```python
+%%runphaser 500 500 white
+
+scene = None
+cursor = None
+graphics = None
+x = 100
+y = 100
+
+def create(data):
+  global cursor, graphics
+  cursor = scene.input.keyboard.createCursorKeys()
+  graphics = scene.add.graphics()
+
+
+def update(time, delta):
+  global x, y
+  graphics.clear()
+  if cursor.left.isDown:
+    x -= 5
+  if cursor.right.isDown:
+    x += 5
+  if cursor.up.isDown:
+    y -= 5
+  if cursor.down.isDown:
+    y += 5
+  graphics.fillStyle(0xff0000)
+  graphics.fillCircle(x, y, 30)
+
+
+scene = Phaser.Scene.new('main')
+scene.create = create
+scene.update = update
+
+config = {
+  'type': Phaser.AUTO,
+  'width': 800,
+  'height': 600,
+  'scene': [scene]
+}
+```
+
 ### グローバル変数
 
 PyScriptから以下の変数にアクセスできます。

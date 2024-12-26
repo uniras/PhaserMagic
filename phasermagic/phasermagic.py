@@ -94,6 +94,9 @@ def deep_list_to_jsarray(data):
       array.push(value)
   return array
 
+def set_config(config):
+  return deep_dict_to_jsobj(config)
+
 """
 
     aftercode = """
