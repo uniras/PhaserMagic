@@ -23,8 +23,14 @@ register_phasermagic()
 
 以下は、Phaserライブラリを使って描画した赤い円を矢印キーで動かす例です。
 
+Phaser関連クラスに辞書形式のオプションを渡す場合は、gameconfig関数を通じて渡す必要があります。(gamestart関数に渡すconfig変数は内部でgameconfig関数を使っているので使う必要はありません)
+
+また、PyodideでPhaser関連クラスにコールバック関数を渡す場合は、Pyodide.ffi.create_proxy関数を通じて渡す必要があります。(MicroPythonではそのまま関数を渡しても大丈夫です)
+
 ```python
 %%runphaser 500 500 white
+
+# from pyodide.ffi import create_proxy
 
 scene = None
 cursor = None
@@ -35,7 +41,7 @@ y = 100
 def create(data):
   global cursor, graphics
   cursor = scene.input.keyboard.createCursorKeys()
-  graphics = scene.add.graphics(PhaserGame.set_config({'fillStyle': {'color': 0xff0000}}))
+  graphics = scene.add.graphics(gameconfig({'fillStyle': {'color': 0xff0000}}))
 
 
 def update(time, delta):
@@ -53,8 +59,8 @@ def update(time, delta):
 
 
 scene = Phaser.Scene.new('SampleScene')
-scene.create = create
-scene.update = update
+scene.create = create  # scene.create = create_proxy(create)
+scene.update = update  # scene.update = create_proxy(update)
 
 config = {
   'type': Phaser.AUTO,
@@ -62,9 +68,13 @@ config = {
   'height': 300,
   'scene': [scene]
 }
+
+game = gamestart(config)
 ```
 
 Phaser.SceneクラスをPyScript用にラップしたPhaserSceneクラスを継承して独自のシーンクラスを作成する形でも記述できます。
+
+PhaserSceneクラス内でcreate_proxy関数を通じたコールバックの設定をしているので、PyodideでもPhaserSceneクラスを継承する場合はcreate_proxy関数を使う必要はありません。
 
 ```python
 %%runphaser 500 500 white
@@ -77,12 +87,9 @@ class SampleScene(PhaserScene):
         self.x = 100
         self.y = 100
 
-    def preload(self, this):
-        pass
-
     def create(self, this, data):
         self.cursor = this.input.keyboard.createCursorKeys()
-        self.graphics = this.add.graphics(PhaserGame.set_config({'fillStyle': {'color': 0xff0000}}))
+        self.graphics = this.add.graphics(gameconfig({'fillStyle': {'color': 0xff0000}}))
 
     def update(self, this, time, delta):
         self.graphics.clear()
@@ -101,8 +108,10 @@ config = {
     'type': Phaser.AUTO,
     'width': 300,
     'height': 300,
-    'scene': [SampleScene().scene]
+    'scene': scenes(SampleScene())  # scenes関数を使えばシーンの設定にPhaserSceneクラスのインスタンスを直接設定できます。,で区切って複数渡すこともできます。
 }
+
+game = gamestart(config)
 ```
 
 ### グローバル変数

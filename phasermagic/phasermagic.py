@@ -80,6 +80,19 @@ except ImportError:
 
 
 class PhaserScene:
+
+    @classmethod
+    def scenes(cls, *scenes):
+        result = []
+
+        for scene in scenes:
+            if isinstance(scene, PhaserScene):
+                result.append(scene.scene)
+            else:
+                result.append(scene)
+
+        return result
+
     def __init__(self, name):
         self.scene = Phaser.Scene.new(name)
         if is_piodide:
@@ -130,7 +143,7 @@ class PhaserScene:
 
 class PhaserGame:
     def __init__(self, config):
-        self.game = Phaser.Game.new(PhaserGame.set_config(config))
+        self.game = Phaser.Game.new(PhaserGame.config(config))
 
     @classmethod
     def _deep_dict_to_jsobj(cls, data):
@@ -161,7 +174,7 @@ class PhaserGame:
         return array
 
     @classmethod
-    def set_config(cls, config):
+    def config(cls, config):
         if is_piodide:
             return to_js(config, dict_converter=js.Object.fromEntries)
         else:
@@ -172,16 +185,17 @@ class PhaserGame:
         game = PhaserGame(config)
         return game.game
 
-"""
 
-    aftercode = """
+scenes = PhaserScene.scenes
 
-game = PhaserGame.start(config)
+gameconfig = PhaserGame.config
+
+gamestart = PhaserGame.start
 
 """
 
     # セル内のPythonコードとPhaser用追加スクリプトを結合
-    args["py_script"] = precode + py_script + aftercode
+    args["py_script"] = precode + py_script
 
     return args
 
