@@ -66,66 +66,121 @@ def set_phaser_args(args):
     # 外部JavaScriptの追加
     args["add_src"] = ["https://cdn.jsdelivr.net/npm/phaser@v3/dist/phaser.min.js"]
 
-    # phaser用追加スクリプト
+    # Phaser用追加スクリプト
     precode = """
 import js
 
 Phaser = js.Phaser
 
-def deep_dict_to_jsobj(data):
-    if not isinstance(data, dict):
-        return data
-    object = js.Object.new()
-    for key, value in data.items():
-        if isinstance(value, dict):
-            object[key] = deep_dict_to_jsobj(value)
-        elif isinstance(value, list):
-            object[key] = deep_list_to_jsarray(value)
-        else:
-            object[key] = value
-    return object
+try:
+    from pyodide.ffi import to_js, create_proxy
+    is_piodide = True
+except ImportError:
+    is_piodide = False
 
 
-def deep_list_to_jsarray(data):
-    if not isinstance(data, list):
-        return data
-    array = js.Array.new()
-    for value in data:
-        if isinstance(value, dict):
-            array.push(deep_dict_to_jsobj(value))
-        elif isinstance(value, list):
-            array.push(deep_list_to_jsarray(value))
-        else:
-            array.push(value)
-    return array
-
-def set_config(config):
-    return deep_dict_to_jsobj(config)
-
-class PhaserScene():
+class PhaserScene:
     def __init__(self, name):
         self.scene = Phaser.Scene.new(name)
-        self.scene.preload = self.preload
-        self.scene.create = self.create
-        self.scene.update = self.update
+        if is_piodide:
+            self.preload_proxy = create_proxy(self._pyodide_preload)
+            self.create_proxy = create_proxy(self._pyodide_create)
+            self.update_proxy = create_proxy(self._pyodide_update)
+            self.scene.preload = self.preload_proxy
+            self.scene.create = self.create_proxy
+            self.scene.update = self.update_proxy
+        else:
+            self.scene.preload = self._micropython_preload
+            self.scene.create = self._micropython_create
+            self.scene.update = self._micropython_update
 
-    def preload(self):
+    def __del__(self):
+        if is_piodide:
+            self.update_proxy.destroy()
+
+    def _pyodide_preload(self):
+        self.preload_proxy.destroy()
+        self.preload(self.scene)
+
+    def _pyodide_create(self, data):
+        self.create_proxy.destroy()
+        self.create(self.scene, data)
+
+    def _pyodide_update(self, time, delta):
+        self.update(self.scene, time, delta)
+
+    def _micropython_preload(self):
+        self.preload(self.scene)
+
+    def _micropython_create(self, data):
+        self.create(self.scene, data)
+
+    def _micropython_update(self, time, delta):
+        self.update(self.scene, time, delta)
+
+    def preload(self, this):
         pass
 
-    def create(self, data):
+    def create(self, this, data):
         pass
 
-    def update(self, time, delta):
+    def update(self, this, time, delta):
         pass
+
+
+class PhaserGame:
+    def __init__(self, config):
+        self.game = Phaser.Game.new(PhaserGame.set_config(config))
+
+    @classmethod
+    def _deep_dict_to_jsobj(cls, data):
+        if not isinstance(data, dict):
+            return data
+        object = js.Object.new()
+        for key, value in data.items():
+            if isinstance(value, dict):
+                object[key] = PhaserGame._deep_dict_to_jsobj(value)
+            elif isinstance(value, list):
+                object[key] = PhaserGame._deep_list_to_jsarray(value)
+            else:
+                object[key] = value
+        return object
+
+    @classmethod
+    def _deep_list_to_jsarray(cls, data):
+        if not isinstance(data, list):
+            return data
+        array = js.Array.new()
+        for value in data:
+            if isinstance(value, dict):
+                array.push(PhaserGame._deep_dict_to_jsobj(value))
+            elif isinstance(value, list):
+                array.push(PhaserGame._deep_list_to_jsarray(value))
+            else:
+                array.push(value)
+        return array
+
+    @classmethod
+    def set_config(cls, config):
+        if is_piodide:
+            return to_js(config, dict_converter=js.Object.fromEntries)
+        else:
+            return PhaserGame._deep_dict_to_jsobj(config)
+
+    @classmethod
+    def start(cls, config):
+        game = PhaserGame(config)
+        return game.game
 
 """
 
     aftercode = """
-game = Phaser.Game.new(set_config(config))
+
+game = PhaserGame.start(config)
 
 """
 
-    # セル内のPythonコードとjspreadsheet実行スクリプトを結合
+    # セル内のPythonコードとPhaser用追加スクリプトを結合
     args["py_script"] = precode + py_script + aftercode
 
     return args

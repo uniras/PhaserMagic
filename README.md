@@ -77,14 +77,14 @@ class SampleScene(PhaserScene):
         self.x = 100
         self.y = 100
 
-    def preload(self):
+    def preload(self, this):
         pass
 
-    def create(self, data):
-        self.cursor = self.scene.input.keyboard.createCursorKeys()
-        self.graphics = self.scene.add.graphics(set_config({'fillStyle': {'color': 0xff0000}}))
+    def create(self, this, data):
+        self.cursor = this.input.keyboard.createCursorKeys()
+        self.graphics = this.add.graphics(set_config({'fillStyle': {'color': 0xff0000}}))
 
-    def update(self, time, delta):
+    def update(self, this, time, delta):
         self.graphics.clear()
         if self.cursor.left.isDown:
             self.x -= 5
