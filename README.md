@@ -76,6 +76,10 @@ Phaser.SceneクラスをPyScript用にラップしたPhaserSceneクラスを継�
 
 PhaserSceneクラス内でcreate_proxy関数を通じたコールバックの設定をしているので、PyodideでもPhaserSceneクラスを継承する場合はcreate_proxy関数を使う必要はありません。
 
+PhaserSceneクラスのインスタンスをconfigのsceneに設定する場合はインスタンスのsceneプロパティを渡す必要がありますが(例:`scene: [Scene1().scene]`)、
+
+scenes関数を使ってPhaserSceneインスタンスを直接設定することもできます(例:`'scene': scenes(Scene1())`)。`,`で区切って複数渡すこともできます(例:`'scene': scenes(Scene1(), Scene2())`)。
+
 ```python
 %%runphaser 500 500 white
 
@@ -108,7 +112,7 @@ config = {
     'type': Phaser.AUTO,
     'width': 300,
     'height': 300,
-    'scene': scenes(SampleScene())  # scenes関数を使えばシーンの設定にPhaserSceneクラスのインスタンスを直接設定できます。,で区切って複数渡すこともできます。
+    'scene': scenes(SampleScene())
 }
 
 game = gamestart(config)

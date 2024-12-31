@@ -73,26 +73,13 @@ import js
 Phaser = js.Phaser
 
 try:
-    from pyodide.ffi import to_js, create_proxy
+    from pyodide.ffi import create_proxy
     is_piodide = True
 except ImportError:
     is_piodide = False
 
 
 class PhaserScene:
-
-    @classmethod
-    def scenes(cls, *scenes):
-        result = []
-
-        for scene in scenes:
-            if isinstance(scene, PhaserScene):
-                result.append(scene.scene)
-            else:
-                result.append(scene)
-
-        return result
-
     def __init__(self, name):
         self.scene = Phaser.Scene.new(name)
         if is_piodide:
@@ -145,6 +132,18 @@ class PhaserGame:
     def __init__(self, config):
         self.game = Phaser.Game.new(PhaserGame.config(config))
 
+    setPropFromPy = js.Function.new("obj", "key", "value", "obj[key] = value")
+
+    @classmethod
+    def scenes(cls, *scenes):
+        result = []
+        for scene in scenes:
+            if isinstance(scene, PhaserScene):
+                result.append(scene.scene)
+            else:
+                result.append(scene)
+        return result
+
     @classmethod
     def _deep_dict_to_jsobj(cls, data):
         if not isinstance(data, dict):
@@ -152,11 +151,11 @@ class PhaserGame:
         object = js.Object.new()
         for key, value in data.items():
             if isinstance(value, dict):
-                object[key] = PhaserGame._deep_dict_to_jsobj(value)
+                PhaserGame.setPropFromPy(object, key, PhaserGame._deep_dict_to_jsobj(value))
             elif isinstance(value, list):
-                object[key] = PhaserGame._deep_list_to_jsarray(value)
+                PhaserGame.setPropFromPy(object, key, PhaserGame._deep_list_to_jsarray(value))
             else:
-                object[key] = value
+                PhaserGame.setPropFromPy(object, key, value)
         return object
 
     @classmethod
@@ -175,10 +174,7 @@ class PhaserGame:
 
     @classmethod
     def config(cls, config):
-        if is_piodide:
-            return to_js(config, dict_converter=js.Object.fromEntries)
-        else:
-            return PhaserGame._deep_dict_to_jsobj(config)
+        return PhaserGame._deep_dict_to_jsobj(config)
 
     @classmethod
     def start(cls, config):
@@ -186,7 +182,7 @@ class PhaserGame:
         return game.game
 
 
-scenes = PhaserScene.scenes
+scenes = PhaserGame.scenes
 
 gameconfig = PhaserGame.config
 
