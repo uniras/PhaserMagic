@@ -35,7 +35,7 @@ y = 100
 def create(data):
   global cursor, graphics
   cursor = scene.input.keyboard.createCursorKeys()
-  graphics = scene.add.graphics(set_config({'fillStyle': {'color': 0xff0000}}))
+  graphics = scene.add.graphics(PhaserGame.set_config({'fillStyle': {'color': 0xff0000}}))
 
 
 def update(time, delta):
@@ -82,7 +82,7 @@ class SampleScene(PhaserScene):
 
     def create(self, this, data):
         self.cursor = this.input.keyboard.createCursorKeys()
-        self.graphics = this.add.graphics(set_config({'fillStyle': {'color': 0xff0000}}))
+        self.graphics = this.add.graphics(PhaserGame.set_config({'fillStyle': {'color': 0xff0000}}))
 
     def update(self, this, time, delta):
         self.graphics.clear()
