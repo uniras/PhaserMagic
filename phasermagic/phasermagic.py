@@ -9,7 +9,7 @@ def register_phasermagic():
     ipy = get_ipython()
     ipy.register_magic_function(runphaser)
     ipy.register_magic_function(genphaser)
-    print("Registered Phaser magic commands.")
+    print('Registered Phaser magic commands.')
 
 
 # iframe内でPyScriptを実行するマジックコマンド
@@ -19,7 +19,7 @@ def runphaser(line, cell):
     セル内のPhaserを使ったPythonコードをPyScriptを用いてiframe内で実行するマジックコマンド
 
     Usage:
-        %%runpys [width] [height] [background] [py_type] [py_val] [py_conf] [js_src] [py_ver]
+        %%runpys [width] [height] [background] [py_type] [py_val] [py_conf] [js_src] [py_ver] [viewport]
 
     Args:
         width: iframeの幅を指定します。デフォルトは500です。
@@ -30,11 +30,12 @@ def runphaser(line, cell):
         py_conf: PyScriptの設定を''で囲んだJSON文字列形式で指定します。デフォルトは'{}'です。
         js_src: 外部JavaScriptのURLを''で囲んだ文字列のJSON配列形式で指定します。デフォルトは'[]'です。
         py_ver: PyScriptのバージョンを指定します.
+        viewport: viewportの設定を指定します。デフォルトは'width=device-width, initial-scale=1.0'です。
     """
     # 引数のパース
     args = parse_phaser_args(line, cell)
     args = set_phaser_args(args)
-    args["htmlmode"] = False
+    args['htmlmode'] = False
 
     # PyScriptを実行
     pysmagic.run_pyscript(args)
@@ -48,7 +49,7 @@ def genphaser(line, cell):
     # 引数のパース
     args = parse_phaser_args(line, cell)
     args = set_phaser_args(args)
-    args["htmlmode"] = True
+    args['htmlmode'] = True
 
     # PyScriptを実行
     pysmagic.run_pyscript(args)
@@ -61,10 +62,10 @@ def run_phaser_script(args):
 
 def set_phaser_args(args):
     # pythonコードを取得
-    py_script = args.get("py_script", "")
+    py_script = args.get('py_script', '')
 
     # 外部JavaScriptの追加
-    args["add_src"] = ["https://cdn.jsdelivr.net/npm/phaser@v3/dist/phaser.min.js"]
+    args['add_src'] = ['https://cdn.jsdelivr.net/npm/phaser@v3/dist/phaser.min.js']
 
     # Phaser用追加スクリプト
     precode = """
@@ -132,7 +133,7 @@ class PhaserGame:
     def __init__(self, config):
         self.game = Phaser.Game.new(PhaserGame.config(config))
 
-    setPropFromPy = js.Function.new("obj", "key", "value", "obj[key] = value")
+    setPropFromPy = js.Function.new('obj', 'key', 'value', 'obj[key] = value')
 
     @classmethod
     def scenes(cls, *scenes):
@@ -191,23 +192,25 @@ gamestart = PhaserGame.start
 """
 
     # セル内のPythonコードとPhaser用追加スクリプトを結合
-    args["py_script"] = precode + py_script
+    args['py_script'] = precode + py_script
 
     return args
 
 
 def default_phaser_args():
     return {
-        "width": "500",
-        "height": "500",
-        "background": "white",
-        "py_type": "mpy",
-        "py_val": None,
-        "py_conf": None,
-        "js_src": None,
-        "py_ver": "none",
-        "py_script": "",
+        'width': '500',
+        'height': '500',
+        'background': 'white',
+        'py_type': 'mpy',
+        'py_val': None,
+        'py_conf': None,
+        'js_src': None,
+        'py_ver': 'none',
+        'py_script': '',
+        'viewport': 'width=device-width, initial-scale=1.0',
     }
+
 
 def parse_phaser_args(line, cell):
     # 引数のパース
@@ -222,15 +225,16 @@ def parse_phaser_args(line, cell):
             args = def_args
     else:
         args = {}
-        args["width"] = line_args[0] if len(line_args) > 0 else def_args["width"]
-        args["height"] = line_args[1] if len(line_args) > 1 else def_args["height"]
-        args["background"] = line_args[2] if len(line_args) > 2 else def_args["background"]
-        args["py_type"] = line_args[3] if len(line_args) > 3 else def_args["py_type"]
-        args["py_val"] = line_args[4] if len(line_args) > 4 and line_args[4] != "{}" else def_args["py_val"]
-        args["py_conf"] = line_args[5] if len(line_args) > 5 and line_args[5] != "{}" else def_args["py_conf"]
-        args["js_src"] = line_args[6] if len(line_args) > 6 and line_args[6] != "[]" else def_args["js_src"]
-        args["py_ver"] = line_args[7] if len(line_args) > 7 else def_args["py_ver"]
+        args['width'] = line_args[0] if len(line_args) > 0 else def_args['width']
+        args['height'] = line_args[1] if len(line_args) > 1 else def_args['height']
+        args['background'] = line_args[2] if len(line_args) > 2 else def_args['background']
+        args['py_type'] = line_args[3] if len(line_args) > 3 else def_args['py_type']
+        args['py_val'] = line_args[4] if len(line_args) > 4 and line_args[4] != '{}' else def_args['py_val']
+        args['py_conf'] = line_args[5] if len(line_args) > 5 and line_args[5] != '{}' else def_args['py_conf']
+        args['js_src'] = line_args[6] if len(line_args) > 6 and line_args[6] != '[]' else def_args['js_src']
+        args['py_ver'] = line_args[7] if len(line_args) > 7 else def_args['py_ver']
+        args['viewport'] = line_args[8] if len(line_args) > 8 else def_args['viewport']
 
-    args["py_script"] = cell
+    args['py_script'] = cell
 
     return args
