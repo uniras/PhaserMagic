@@ -134,7 +134,7 @@ PyScriptから以下の変数にアクセスできます。
 
 #### %%runphaser
 
-コードセルのコードをPyScriptを使ってiframe内で実行します。
+コードセルのコードをPyScriptを使ってiframe内で実行します。別のセルでpys_args変数を設定して実行している場合はその値がマジックコマンドの引数として使用されます。
 
 ```jupyter
 %%runphaser [width] [height] [background] [py_type] [py_val] [py_conf] [js_src] [py_ver]
